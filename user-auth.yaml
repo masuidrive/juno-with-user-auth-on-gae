@@ -1,0 +1,23 @@
+development:
+  email-confimation:
+    http_prefix: http://localhost:8080
+    salt: your-secret-key
+    sender: your@gmail.com
+    subject: Register confirmation for development
+    body: |
+      Please click below
+      %s
+      
+      The example.com Team
+
+production:
+  email-confimation:
+    http_prefix: http://your-application-id.appspot.com
+    salt: your-secret-key
+    sender: your@gmail.com
+    subject: Register confirmation
+    body: |
+      Please click below
+      %s
+      
+      The example.com Team

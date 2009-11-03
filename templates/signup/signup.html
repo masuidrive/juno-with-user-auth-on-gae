@@ -1,0 +1,19 @@
+<form action="/signup/create" method="post">
+  <input type="hidden" name="key" value="{{ key|escape }}">
+  <dl>
+    <dt>Email:</dt><dd>{{ email|escape }}<input type="hidden" name="email" value="{{ email|escape }}"></dd>
+    <dt>Full name:</dt><dd><input type="text" name="fullname" value="{{ fullname|escape }}"></dd>
+    <dt>Account:</dt><dd><input type="text" name="account" value="{{ account|escape }}"></dd>
+    <dt>Password:</dt><dd><input type="password" name="password" class="password"></dd>
+    <dt>Confirmation:</dt><dd><input type="password" name="password_confirmation" class="password_confirmation"></dd>
+  </dl>
+  <div class="actions">
+    <input type="submit" class="signup-button" value="Sign up"/>
+  </div>
+</form>
+
+<ul>
+{% for error in errors %}
+  <li>{{error.message|escape}}</li>
+{% endfor %}
+</ul>
