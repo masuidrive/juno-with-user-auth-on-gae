@@ -13,14 +13,14 @@ class User(dbex.BaseModel):
     @classmethod
     def authenticate(cls, login, password):
         user_auths = model.UserAuthentication.all().filter("email", login).fetch(1)
-        if len(user_auths)>0:
+        if user_auths:
             if user_auths[0].authorize(password):
                 return user_auths[0].parent()
         else:
             users = cls.all().filter("account", login).fetch(1)
-            if len(users)>0:
+            if users:
                 user_auths = model.UserAuthentication.all().ancestor(users[0]).fetch(1)
-                if len(user_auths)>0 and user_auths[0].authorize(password):
+                if user_auths and user_auths[0].authorize(password):
                     return users[0]
         return None
     
