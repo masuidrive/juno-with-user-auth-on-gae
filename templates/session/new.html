@@ -1,6 +1,6 @@
 <form action="login" method="post">
   <dl>
-    <dt>Email/Account:</dt><dd><input type="text" name="login" class="login"></dd>
+    <dt>Email/Account:</dt><dd><input type="text" name="login" class="login" value="{{ login|escape }}"></dd>
     <dt>Password:</dt><dd><input type="password" name="password" class="password"></dd>
   </dl>
   <div class="actions">

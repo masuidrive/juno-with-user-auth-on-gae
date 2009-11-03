@@ -6,7 +6,7 @@ import model
 def login_form(web):
     incorrent_login = False
     login = web.input('login')
-    return template('session/new.html', {"login":login, "incorrent_login":False})
+    return template('session/new.html', {"login":login or "", "incorrent_login":False})
 
 @post('/login')
 def login_form(web):
