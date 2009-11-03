@@ -135,15 +135,6 @@ class UniqueModel(db.Model):
             else:
                 raise UniqueConstraintViolatedError,'Unique constraint %s violated on kind %s!' % unique[1]
     
-    def check_uniqueness(self):
-        for ut in self.__class__._uniques:
-            for property in ut:
-                count = self.__class__.all().filter(('%s=' % property.name), str(getattr(self, property.name))).fetch(1)
-                if count > 0:
-                    return False
-
-        return True
-
     def put(self):
         """Method used to store instances of UniqueModel to the datastore"""
         

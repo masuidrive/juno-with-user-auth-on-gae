@@ -1,8 +1,14 @@
 <form action="/signup/send_confirmation_email" method="post">
   <dl>
-    <dt>Email:</dt><dd><input type="text" name="email" class="email"></dd>
+    <dt>Email:</dt><dd><input type="text" name="email" class="email" value="{{ email|escape }}"></dd>
   </dl>
   <div class="actions">
     <input type="submit" class="send-confirmation-email" value="Send confirmation email"/>
   </div>
 </form>
+
+<ul>
+{% for error in errors %}
+  <li>{{ error.message|escape }} ({{ error.property_name|escape }})</li>
+{% endfor %}
+</ul>

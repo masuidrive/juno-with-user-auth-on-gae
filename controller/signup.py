@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+from google.appengine.ext import db
+
 from juno import *
-from vendor import burns
 import model
 
 @route('/signup')
@@ -13,9 +14,9 @@ def send_confirmation_email(web):
     email = web.input('email')
     errors = []
     auth = model.UserAuthentication(email = email)
-    if auth.check_uniqueness():
-        errors.append(webappex.ErrorMessage('email', '%s is registered' % (auth.email)))
-        return template('signup/new.html')
+    if model.UserAuthentication.email_is_registered(email):
+        errors.append({'property_name':'email', 'message':'Email is registered'})
+        return template('signup/new.html', {'email':email, 'errors':errors})
     uce = model.UserConfirmationEmail(email)
     uce.send()
     return template('signup/sent_confirmation_email.html')
@@ -38,36 +39,33 @@ def create(web):
         return redirect("/signup")
     
     errors = []
-    user = model.User(account = web.input('account'), fullname = web.input('fullname'))
-    try:
-        user.put()
-    except burns.UniqueConstraintViolatedError, e:
-        errors.append({'field':'account', 'message':'Account is registered'})
+    account = web.input('account')
+    fullname = web.input('fullname')
+    user = model.User(account=account, fullname=account)
+    if not user.is_valid():
+        errors.extend(user.errors)
+    auth =  model.UserAuthentication(email=email)
+    if not auth.is_valid():
+        errors.extend(auth.errors)
+
+    # check password and confirmation
+    password = web.input('password')
+    if password == '' or password == None:
+        errors.append({'property_name':'password', 'message':"password is required"})
+    elif password != web.input('password_confirmation'):
+        errors.append({'property_name':'password', 'message':"password doesn't match password and confirmation"})
     
-    if user.is_saved():
-        user_authentication = model.UserAuthentication(parent = user, user = user, email = web.input('email'))
-        if user_authentication.check_uniqueness():
-            errors.append({'field':'Email', 'message':'%s is registered'})
-        else:
-            user_authentication.put()
-        
-        password = web.input('password')
-        if password == '' or password == None:
-            errors.append({'field':'password', 'message':"Required password"})
-        elif password != web.input('password_confirmation'):
-            errors.append({'field':'password', 'message':"Don't match password and confirmation"})
-        else:
-            user_authentication.update_password(password)
-            user_authentication.put()
-    else:
-        pass
+    if not errors:
+        try:
+            user.put()
+            auth = model.UserAuthentication(parent=user, user=user, email=email)
+            auth.update_password(password)
+            auth.put()
+        except:
+            user.delete()
+            auth.delete()
     
-    """
-    user_detail = model.UserDetail(parent = user, user = user)
-    user_detail.put()
-    """
-        
-    if len(errors)==0:
-        template('signup/signedup.html', {'my': ''})
+    if errors:
+        return template('signup/signup.html', {'email':email, 'key':key, 'email':email, 'fullname':fullname, 'account':account ,'errors':errors})
     else:
-        template('signup/signup.html', {'email':email, 'key':key, 'errors':errors})
+        return template('signup/signedup.html', {'user':user, 'auth':auth})

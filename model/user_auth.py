@@ -1,20 +1,28 @@
 # -*- coding: utf-8 -*-
-from google.appengine.ext import db
-from google.appengine.api import mail
-import os
 import urllib
 import hashlib
 import random
-import yaml
-import gae_util
-from vendor import burns
 
-class UserAuthentication(burns.UniqueModel):
+from google.appengine.ext import db
+from google.appengine.api import mail
+import yaml
+
+import gae_util
+import dbex
+
+import model
+
+class UserAuthentication(dbex.BaseModel):
+    user = db.ReferenceProperty(model.User)
     email = db.EmailProperty()
     salt = db.StringProperty()
     crypted_password = db.StringProperty()
     accept_login = db.BooleanProperty(default=True, required=True)
     _uniques = set([(email,)])
+
+    @classmethod
+    def email_is_registered(cls, email):
+        return not not cls.all().filter('email', email).fetch(1)
 
     def authorize(self, password):
         return self.accept_login and self.crypt_password(password)==self.crypted_password

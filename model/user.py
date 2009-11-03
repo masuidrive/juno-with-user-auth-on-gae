@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from google.appengine.ext import db
-from vendor import burns
+import dbex
 import model
 
-class User(burns.UniqueModel):
+class User(dbex.BaseModel):
     account = db.StringProperty(required=True)
     registered_at = db.DateTimeProperty(auto_now_add=True)
     _uniques = set([(account,)])

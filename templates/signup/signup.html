@@ -14,6 +14,6 @@
 
 <ul>
 {% for error in errors %}
-  <li>{{error.message|escape}}</li>
+  <li>{{ error.message|escape }} ({{ error.property_name|escape }})</li>
 {% endfor %}
 </ul>
