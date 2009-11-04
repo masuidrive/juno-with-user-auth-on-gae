@@ -4,12 +4,12 @@ from google.appengine.ext import db
 from juno import *
 import model
 
-@route('/signup')
+@get('/signup')
 def index(web):
     return template('signup/new.html')
 
 
-@route('/signup/send_confirmation_email')
+@post('/signup/send_confirmation_email')
 def send_confirmation_email(web):
     email = web.input('email')
     errors = []
@@ -22,7 +22,7 @@ def send_confirmation_email(web):
     return template('signup/sent_confirmation_email.html')
 
 
-@route('/signup/confirm_email')
+@get('/signup/confirm_email')
 def confirm_email(web):
     email = web.input('email')
     key = web.input('key')
@@ -31,7 +31,7 @@ def confirm_email(web):
     return template('signup/signup.html', {'email': web.input('email'), 'key': web.input('key')})
 
 
-@route('/signup/create')
+@post('/signup/create')
 def create(web):
     email = web.input('email')
     key = web.input('key')
@@ -50,7 +50,7 @@ def create(web):
 
     # check password and confirmation
     password = web.input('password')
-    if password == '' or password == None:
+    if not password or password == ''
         errors.append({'property_name':'password', 'message':"password is required"})
     elif password != web.input('password_confirmation'):
         errors.append({'property_name':'password', 'message':"password doesn't match password and confirmation"})
