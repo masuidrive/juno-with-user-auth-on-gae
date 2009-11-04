@@ -8,7 +8,7 @@ class Validator(object):
         return False
 
 
-class RegexpValidator(object):
+class RegexpValidator(Validator):
     def __init__(self, property=None, regexp=None, message="%s is incorrect format"):
         self.property = property
         self.message = message
@@ -20,7 +20,7 @@ class RegexpValidator(object):
         return None
 
 
-class RequiredValidator(object):
+class RequiredValidator(Validator):
     def __init__(self, property=None, message="%s is required"):
         self.property = property
         self.message = message
@@ -31,7 +31,7 @@ class RequiredValidator(object):
         return None
 
 
-class ConfirmedValidator(object):
+class ConfirmedValidator(Validator):
     def __init__(self, property=None, confirmation_property=None, message="%s is required"):
         self.property = property
         self.message = message
@@ -43,7 +43,7 @@ class ConfirmedValidator(object):
         return None
 
 
-class EmailValidator(object):
+class EmailValidator(Validator):
     def __init__(self, property=None, message="%s is incorrect format"):
         self.property = property
         self.message = message
@@ -54,7 +54,7 @@ class EmailValidator(object):
         return None
 
 
-class UniqueValidator(object):
+class UniqueValidator(Validator):
     def __init__(self, property=None, model=None, model_property=None, message="%s is registered"):
         self.property = property
         self.message = message
