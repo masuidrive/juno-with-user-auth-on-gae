@@ -1,23 +1,31 @@
-<form action="/signup/create" method="post">
-  <input type="hidden" name="key" value="{{ web.input('key') or '' }}">
-  <dl>
-    <dt>Email:</dt>
-    <dd>
-      {{ web.input('email')}}
-      <input type="hidden" name="email" value="{{ web.input('email') or '' }}">
-    </dd>
-    <dt>Full name:</dt><dd><input type="text" name="fullname" value="{{ web.input('fullname') or '' }}"></dd>
-    <dt>Account:</dt><dd><input type="text" name="account" value="{{ web.input('account') or '' }}"></dd>
-    <dt>Password:</dt><dd><input type="password" name="password" class="password"></dd>
-    <dt>Confirmation:</dt><dd><input type="password" name="password_confirmation" class="password_confirmation"></dd>
-  </dl>
-  <div class="actions">
-    <input type="submit" class="signup-button" value="Sign up"/>
-  </div>
-</form>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+  </head>
+  <body>
+    <form action="/signup/create" method="post">
+      <input type="hidden" name="key" value="{{ (web.input('key') or '')|escape }}">
+      <dl>
+	<dt>Email:</dt>
+	<dd>
+	  {{ web.input('email')}}
+	  <input type="hidden" name="email" value="{{ (web.input('email') or '')|escape }}">
+	</dd>
+	<dt>Full name:</dt><dd><input type="text" name="fullname" value="{{ (web.input('fullname') or '')|escape }}"></dd>
+	<dt>Account:</dt><dd><input type="text" name="account" value="{{ (web.input('account') or '')|escape }}"></dd>
+	<dt>Password:</dt><dd><input type="password" name="password" class="password"></dd>
+	<dt>Confirmation:</dt><dd><input type="password" name="password_confirmation" class="password_confirmation"></dd>
+      </dl>
+      <div class="actions">
+	<input type="submit" class="signup-button" value="Sign up"/>
+      </div>
+    </form>
 
-<ul>
+    <ul>
 {% for error in errors %}
-  <li>{{ error.message }} ({{ error.property }})</li>
+      <li>{{ error.message|escape }} ({{ error.property|escape }})</li>
 {% endfor %}
-</ul>
+    </ul>
+  </body>
+</html>

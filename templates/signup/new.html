@@ -1,14 +1,22 @@
-<form action="/signup/send_confirmation_email" method="post">
-  <dl>
-    <dt>Email:</dt><dd><input type="text" name="email" class="email" value="{{ web.input('email') or '' }}"></dd>
-  </dl>
-  <div class="actions">
-    <input type="submit" class="send-confirmation-email" value="Send confirmation email"/>
-  </div>
-</form>
-
-<ul>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+  </head>
+  <body>
+    <form action="/signup/send_confirmation_email" method="post">
+      <dl>
+	<dt>Email:</dt><dd><input type="text" name="email" class="email" value="{{ (web.input('email') or '')|escape }}"></dd>
+      </dl>
+      <div class="actions">
+	<input type="submit" class="send-confirmation-email" value="Send confirmation email"/>
+      </div>
+    </form>
+    
+    <ul>
 {% for error in errors %}
-  <li>{{ error.message }} ({{ error.property }})</li>
+      <li>{{ error.message|escape }} ({{ error.property|escape }})</li>
 {% endfor %}
-</ul>
+    </ul>
+  </body>
+</html>
