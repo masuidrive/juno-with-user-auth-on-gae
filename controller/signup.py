@@ -16,7 +16,7 @@ class SignupEmailForm(form.Form):
                              message="Email is registered"),
         )
     
-    def validate(self, web, entries=None):
+    def validate(self, params, entries=None):
         """ custom validator """
         pass
 
@@ -42,7 +42,7 @@ class SignupForm(form.Form):
                              message="Password is over 4 chars"),
         )
     
-    def validate(self, web, entries=None):
+    def validate(self, params, entries=None):
         """ custom validator """
         pass
 
@@ -62,7 +62,7 @@ def index(web):
 @post('/signup/send_confirmation_email')
 def send_confirmation_email(web):
     f = SignupEmailForm()
-    if not f.is_valid(web):
+    if not f.is_valid(web.input()):
         return template('signup/new.html', {'web':web, 'errors':f.errors})
     uce = model.UserConfirmationEmail(web.input('email'))
     uce.send()
@@ -82,7 +82,7 @@ def create(web):
         return
     
     f = SignupForm()
-    if not f.is_valid(web):
+    if not f.is_valid(web.input()):
         return template('signup/signup.html', {'web':web, 'errors':f.errors})
     
     user = auth = None

@@ -14,8 +14,8 @@ class RegexpValidator(Validator):
         self.message = message
         self.regexp = regexp
 
-    def validate(self, web, entries=None):
-        if not re.match(self.regexp, web.input(self.property)):
+    def validate(self, params, entries=None):
+        if not re.match(self.regexp, params[self.property]):
             return Error(self.property, self.message)
         return None
 
@@ -25,8 +25,8 @@ class RequiredValidator(Validator):
         self.property = property
         self.message = message
 
-    def validate(self, web, entries=None):
-        if not web.input(self.property):
+    def validate(self, params, entries=None):
+        if not params[self.property]:
             return Error(self.property, self.message)
         return None
 
@@ -37,8 +37,8 @@ class ConfirmedValidator(Validator):
         self.message = message
         self.confirmation_property = confirmation_property
     
-    def validate(self, web, entries=None):
-        if web.input(self.property)!=web.input(self.confirmation_property):
+    def validate(self, params, entries=None):
+        if params[self.property]!=params[self.confirmation_property]:
             return Error(self.property, self.message)
         return None
 
@@ -48,8 +48,8 @@ class EmailValidator(Validator):
         self.property = property
         self.message = message
 
-    def validate(self, web, entries=None):
-        if not re.match("[-_.a-zA-Z0-9]+@[a-zA-Z0-9.]+\.[a-z]{2,}", web.input(self.property)):
+    def validate(self, params, entries=None):
+        if not re.match("[-_.a-zA-Z0-9]+@[a-zA-Z0-9.]+\.[a-z]{2,}", params[self.property]):
             return Error(self.property, self.message)
         return None
 
@@ -61,14 +61,14 @@ class UniqueValidator(Validator):
         self.model = model
         self.model_property = model_property
 
-    def validate(self, web, entries=None):
+    def validate(self, params, entries=None):
         key = None
         if entries:
             for entry in entries:
                 if isinstance(entry, self.model):
                     key = entry.key()
                     break
-        existing_entry = self.model.all().filter(self.model_property, web.input(self.property)).fetch(1)
+        existing_entry = self.model.all().filter(self.model_property, params[self.property]).fetch(1)
         if existing_entry and (not key or (key and existing_entry.key()!=key)):
             return Error(self.property, self.message)
         return None
@@ -90,14 +90,14 @@ class Form(object):
     def __init__(self):
         pass
     
-    def validate(self, web, entries=None):
+    def validate(self, params, entries=None):
         pass
     
-    def is_valid(self, web, entries=None):
+    def is_valid(self, params, entries=None):
         self.errors = []
-        self.validate(web)
+        self.validate(params)
         for validator in self.validators:
-            error = validator.validate(web, entries)
+            error = validator.validate(params, entries)
             if error:
                 self.errors.append(error)
         return not self.errors
