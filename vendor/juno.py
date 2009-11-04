@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # http://github.com/justinjas/juno-gae
 
 # Built in library imports
@@ -232,6 +233,8 @@ class JunoRequest(object):
             else: input_dict[k] = v
         # Reduce the dict - change one item lists ([a] to a)
         for k, v in input_dict.items(): 
+            for i in range(0, len(v)):
+                v[i] = v[i].decode(config('charset')) # masuidrive
             if len(v) == 1: input_dict[k] = v[0]
         self.raw['input'] = input_dict
 
