@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
 from google.appengine.ext import db
-import dbex
 import model
 
-class User(dbex.BaseModel):
+class User(db.Model):
     account = db.StringProperty(required=True)
-    registered_at = db.DateTimeProperty(auto_now_add=True)
-    _uniques = set([(account,)])
-    
     fullname = db.StringProperty(required=True)
+    registered_at = db.DateTimeProperty(auto_now_add=True)
+    posted_at = db.DateTimeProperty()
+    _uniques = set([(account,)])
     
     @classmethod
     def authenticate(cls, login, password):
@@ -19,7 +19,7 @@ class User(dbex.BaseModel):
         else:
             users = cls.all().filter("account", login).fetch(1)
             if users:
-                user_auths = model.UserAuthentication.all().ancestor(users[0]).fetch(1)
+                user_auths = model.UserAuthentication.all().filter("user", users[0]).fetch(1)
                 if user_auths and user_auths[0].authorize(password):
                     return users[0]
         return None
@@ -31,19 +31,7 @@ class User(dbex.BaseModel):
         except:
             return None
     
-    @classmethod
-    def signup(cls, params):
-        user = auth = None
-        try:
-            user = User(account=params['account'], fullname=params['fullname'])
-            if not user.is_valid(): raise Exception, "rollback"
-            user.put()
-            auth = model.UserAuthentication(parent=user, user=user, email=params['email'])
-            auth.update_password(params['password'])
-            if not auth.is_valid(): raise Exception, "rollback"
-            auth.put()
-            return user
-        except:
-            user.delete()
-            auth.delete()
-            return None
+    def update_posted_at(self, posted_at=datetime.now()):
+        self.posted_at = posted_at
+        self.put()
+        model.Follower.update_posted_at(self, posted_at)

@@ -8,32 +8,31 @@ from google.appengine.api import mail
 import yaml
 
 import gae_util
-import dbex
-
 import model
 
-class UserAuthentication(dbex.BaseModel):
-    user = db.ReferenceProperty(model.User)
-    email = db.EmailProperty()
-    salt = db.StringProperty()
-    crypted_password = db.StringProperty()
+class UserAuthentication(db.Model):
+    user = db.ReferenceProperty(model.User, required=True)
+    email = db.EmailProperty(required=True)
+    salt = db.StringProperty(required=True)
+    crypted_password = db.StringProperty(required=True)
     accept_login = db.BooleanProperty(default=True, required=True)
     _uniques = set([(email,)])
 
     @classmethod
     def email_is_registered(cls, email):
         return not not cls.all().filter('email', email).fetch(1)
-
+    
+    @classmethod
+    def crypt_password(cls, password, salt):
+        return hashlib.sha1(password+salt).hexdigest()
+    
+    @classmethod
+    def generate_salt(cls):
+        return hashlib.sha1("%f!!%f" % (random.random(), random.random())).hexdigest()
+    
     def authorize(self, password):
-        return self.accept_login and self.crypt_password(password)==self.crypted_password
+        return self.accept_login and self.crypt_password(password, self.salt)==self.crypted_password
     
-    def crypt_password(self, password):
-        return hashlib.sha1(password+self.salt).hexdigest()
-    
-    def update_password(self, password):
-        self.salt = hashlib.sha1("%f!!%f" % (random.random(), random.random())).hexdigest()
-        self.crypted_password = self.crypt_password(password)
-
 
 class UserConfirmationEmail:
     config = {}
@@ -50,7 +49,7 @@ class UserConfirmationEmail:
         self.to_addr = to_addr
         self.salt = "your-secret-key"
     
-    def activation(self, key):
+    def activate(self, key):
         return self.generate_key()==key
 
     def generate_key(self):
