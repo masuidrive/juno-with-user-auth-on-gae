@@ -232,9 +232,8 @@ class JunoRequest(object):
             # Otherwise just add this key
             else: input_dict[k] = v
         # Reduce the dict - change one item lists ([a] to a)
-        for k, v in input_dict.items(): 
-            for i in range(0, len(v)):
-                v[i] = v[i].decode(config('charset')) # masuidrive
+        for k, v in input_dict.items():
+            v = [s.decode(config('charset')) for s in v] # masuidrive
             if len(v) == 1: input_dict[k] = v[0]
         self.raw['input'] = input_dict
 
@@ -401,8 +400,7 @@ def status(code):
 
 def redirect(url, code=302):
     status(code)
-    # clear the response headers and add the location header
-    _response.config['headers'] = { 'Location': url }
+    _response.header('Location', url) # masuidrive
     return _response
 
 def assign(from_, to):
@@ -572,7 +570,7 @@ def get_application(process_func):
     if config('use_debugger'):
         middleware_list.append(('werkzeug.DebuggedApplication', {'evalex': True}))
     if config('use_sessions') and config('session_lib') == 'beaker':
-        middleware_list.append(('beaker.middleware.SessionMiddleware', {}))
+        middleware_list.append(('beaker.middleware.SessionMiddleware', {'session.type': 'ext:google'}))
     middleware_list.extend(config('middleware'))
     application = _load_middleware(application, middleware_list)
 

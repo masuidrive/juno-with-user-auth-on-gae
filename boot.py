@@ -3,17 +3,12 @@ import sys
 sys.path.append('./vendor')
 sys.path.append('./lib')
 
-import gae_util
-from junoex import *
-init({'raise_view_exceptions': gae_util.is_development_env(),
-      'template_root': 'templates',
-      'use_sessions': True,
-      'use_db': False,
-      })
-
-import model
-model.UserConfirmationEmail.load_settings('user-auth.yaml')
+import juno
+juno.init()
 
 from controller import session, signup, main
+#from controller import message, follow
+#from controller import test_user
 
-run()
+# juno.run_with_profiler()
+juno.run()

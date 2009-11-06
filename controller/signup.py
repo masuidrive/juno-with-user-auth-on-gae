@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from google.appengine.ext import db
 
-from juno import *
-import model
+import juno
+import model.user
 import form
 
 
@@ -11,7 +11,7 @@ class SignupEmailForm(form.Form):
         form.EmailValidator(property="email",
                             message="Email incorrect format"),
         form.UniqueValidator(property="email",
-                             model=model.UserAuthentication,
+                             model=model.user.UserAuthentication,
                              model_property="email",
                              message="Email is registered"),
         )
@@ -26,13 +26,16 @@ class SignupForm(form.Form):
         form.EmailValidator(property="email",
                             message="Email incorrect format"),
         form.UniqueValidator(property="email",
-                             model=model.UserAuthentication,
+                             model=model.user.UserAuthentication,
                              model_property="email",
                              message="Email is registered"),
         form.UniqueValidator(property="account",
-                             model=model.User,
+                             model=model.user.User,
                              model_property="account",
                              message="Account is registered"),
+        form.RegexpValidator(property="password",
+                             regexp="[a-zA-Z0-9]{3,}",
+                             message="Account is only alphabets and numbers"),
         form.RequiredValidator(property="fullname"),
         form.ConfirmedValidator(property="password",
                                 confirmation_property="password_confirmation",
@@ -48,62 +51,64 @@ class SignupForm(form.Form):
 
 
 def verify_email_key(web):
-    if not model.UserConfirmationEmail(web.input('email')).activate(web.input('key')):
-        redirect("/signup")
+    if not model.user.UserConfirmationEmail(web.input('email')).activate(web.input('key')):
+        juno.redirect("/signup")
         return False
     return True
 
 
-@get('/signup')
+@juno.get('/signup')
 def index(web):
-    return template('signup/new.html', {'web':web})
+    return juno.template('signup/new.html', {'web':web})
 
 
-@post('/signup/send_confirmation_email')
+@juno.post('/signup/send_confirmation_email')
 def send_confirmation_email(web):
     f = SignupEmailForm()
     if not f.is_valid(web.input()):
-        return template('signup/new.html', {'web':web, 'errors':f.errors})
-    uce = model.UserConfirmationEmail(web.input('email'))
+        return juno.template('signup/new.html', {'web':web, 'errors':f.errors})
+    uce = model.user.UserConfirmationEmail(web.input('email'))
     uce.send()
-    return template('signup/sent_confirmation_email.html', {'web':web})
+    return juno.template('signup/sent_confirmation_email.html', {'web':web})
 
 
-@get('/signup/confirm_email')
+@juno.get('/signup/confirm_email')
 def confirm_email(web):
     if not verify_email_key(web):
         return
-    return template('signup/signup.html', {'web':web})
+    return juno.template('signup/signup.html', {'web':web})
 
 
-@post('/signup/create')
+@juno.post('/signup/create')
 def create(web):
     if not verify_email_key(web):
         return
     
     f = SignupForm()
     if not f.is_valid(web.input()):
-        return template('signup/signup.html', {'web':web, 'errors':f.errors})
+        return juno.template('signup/signup.html', {'web':web, 'errors':f.errors})
     
     user = auth = None
     try:
-        user = model.User(
+        user = model.user.User(
             account=web.input('account'),
             fullname=web.input('fullname')
             )
         user.put()
-        salt = model.UserAuthentication.generate_salt()
-        auth = model.UserAuthentication(
+        salt = model.user.UserAuthentication.generate_salt()
+        auth = model.user.UserAuthentication(
             user=user,
             email=web.input('email'),
             salt=salt,
-            crypted_password=model.UserAuthentication.crypt_password(web.input('password'), salt),
+            crypted_password=model.user.UserAuthentication.crypt_password(web.input('password'), salt),
             )
         auth.put()
+        juno.session.set_user(user)
     except Exception, e:
-        user and user.delete()
-        auth and auth.delete()
-        raise e
+        user and user.is_saved() and user.delete()
+        auth and auth.is_saved() and auth.delete()
+        if not isinstance(e, not DuplicatePropertyError):
+            raise e
     
-    return template('signup/signedup.html', {'web':web})
+    return juno.template('signup/signedup.html', {'web':web})
 

@@ -1,3 +1,1 @@
-from user import *
-from user_auth import *
-
+# -*- coding: utf-8 -*-
